@@ -68,22 +68,23 @@ type darkWeatherData struct {
 
 func main() {
 	http.HandleFunc("/", welcome)
-	http.HandleFunc("/weather/", func(w http.ResponseWriter, r *http.Request) {
-		city := strings.SplitN(r.URL.Path, "/", 3)[2]
-		data, error := query(city)
-		if error != nil {
-			http.Error(w, error.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset = utf-8")
-		json.NewEncoder(w).Encode(data)
-	})
+	http.HandleFunc("/weather/", response)
 	http.ListenAndServe(":8000", nil)
-
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome! \nGo to http://localhost:8000/weather/%City% e.g. Nairobi to find out the temperature\ne.g. /Nairobi"))
+}
+
+func response(w http.ResponseWriter, r *http.Request) {
+	city := strings.SplitN(r.URL.Path, "/", 3)[2]
+	data, error := query(city)
+	if error != nil {
+		http.Error(w, error.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset = utf-8")
+	json.NewEncoder(w).Encode(data)
 }
 
 func query(city string) (tempResponse, error) {
